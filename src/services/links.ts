@@ -211,3 +211,5 @@ export function getMrtSearchUrl(
   return `https://www.myrealtrip.com/${type}?search=${query}`;
 }
 
+
+

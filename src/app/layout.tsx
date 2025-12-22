@@ -1,17 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { QueryProvider } from "@/lib/queryClient";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "MyLinkTrip - 유튜브 여행 영상을 여행 계획으로",
@@ -33,12 +22,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <head>
+        {/* Pretendard 폰트 CDN */}
+        <link
+          rel="stylesheet"
+          as="style"
+          crossOrigin="anonymous"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+        />
+      </head>
+      <body className="antialiased">
         <QueryProvider>
           {/* 모바일 중앙 정렬 컨테이너 */}
-          <div className="mx-auto max-w-lg min-h-screen bg-white shadow-sm">
+          <div className="mx-auto max-w-lg min-h-screen bg-gray-0 shadow-sm">
             {children}
           </div>
         </QueryProvider>

@@ -331,3 +331,5 @@ export function getMrtSearchUrl(
   const query = encodeURIComponent(`${city} ${placeName}`);
   return `https://www.myrealtrip.com/${type}?search=${query}`;
 }
+
+
