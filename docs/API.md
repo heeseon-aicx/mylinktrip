@@ -281,29 +281,48 @@
 
 ---
 
-## 🔄 폴링 사용법
+## 🔄 Realtime 사용법
 
-링크 생성 후 상태가 `READY` 또는 `FAILED`가 될 때까지 폴링합니다.
+Supabase Realtime을 사용하여 링크 상태 변경을 실시간으로 수신합니다.
 
 ```typescript
-import { useLinkPolling } from "@/hooks/useLinkPolling";
+import { useLinkRealtime } from "@/hooks/useLinkRealtime";
 
 function LinkPage({ linkId }: { linkId: number }) {
-  const { link, isLoading, isPolling } = useLinkPolling(linkId, {
-    interval: 2000,      // 2초마다
-    stopOnComplete: true // READY/FAILED면 자동 중지
+  const { link, isLoading, isSubscribed, error } = useLinkRealtime(linkId, {
+    immediate: true,           // 즉시 초기 데이터 fetch
+    unsubscribeOnComplete: true // READY/FAILED면 구독 해제
   });
 
   if (isLoading) return <div>로딩 중...</div>;
+  if (error) return <div>에러: {error.message}</div>;
   
   return (
     <div>
-      <p>상태: {link?.status}</p>
+      <p>상태: {link?.status} {isSubscribed && "🟢 실시간 연결됨"}</p>
       <p>진행률: {link?.progress_pct}%</p>
       <p>{link?.status_message}</p>
+      
+      {link?.status === "READY" && (
+        <ul>
+          {link.link_place_items.map(item => (
+            <li key={item.id}>{item.place_name}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
+```
+
+### Realtime 동작 방식
+
+```
+1. createLink() 호출 → id 반환
+2. useLinkRealtime(id) → 초기 데이터 fetch + 구독 시작
+3. 백그라운드에서 AI 분석 진행 → links 테이블 UPDATE
+4. Realtime이 변경 감지 → 자동으로 UI 업데이트
+5. status가 READY/FAILED → 구독 해제 (옵션)
 ```
 
 ---
@@ -327,7 +346,8 @@ src/
 ├── services/
 │   └── links.ts                        # 클라이언트 사이드 서비스
 ├── hooks/
-│   └── useLinkPolling.ts               # 폴링 훅
+│   ├── useLinkRealtime.ts              # Realtime 훅 ⭐
+│   └── useLinkPolling.ts               # 폴링 훅 (대체용)
 ├── types/
 │   └── database.ts                     # DB 타입
 └── mocks/
