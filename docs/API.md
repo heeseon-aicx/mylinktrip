@@ -15,14 +15,14 @@
 
 ## 📋 엔드포인트 목록
 
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| `POST` | `/links` | 링크 생성 |
-| `GET` | `/links/:id` | 링크 상세 조회 |
-| `GET` | `/links/:id/items/:itemId` | 아이템 단일 조회 |
-| `PATCH` | `/links/:id/items/:itemId` | 아이템 수정 |
-| `DELETE` | `/links/:id/items/:itemId` | 아이템 삭제 |
-| `PATCH` | `/links/:id/items/reorder` | 순서 일괄 변경 |
+| Method   | Endpoint                   | 설명             |
+| -------- | -------------------------- | ---------------- |
+| `POST`   | `/links`                   | 링크 생성        |
+| `GET`    | `/links/:id`               | 링크 상세 조회   |
+| `GET`    | `/links/:id/items/:itemId` | 아이템 단일 조회 |
+| `PATCH`  | `/links/:id/items/:itemId` | 아이템 수정      |
+| `DELETE` | `/links/:id/items/:itemId` | 아이템 삭제      |
+| `PATCH`  | `/links/:id/items/reorder` | 순서 일괄 변경   |
 
 ---
 
@@ -33,6 +33,7 @@
 유튜브 URL을 입력받아 새로운 링크를 생성합니다.
 
 **Request**
+
 ```json
 {
   "youtube_url": "https://www.youtube.com/watch?v=xxxxx"
@@ -40,6 +41,7 @@
 ```
 
 **Response** `201 Created`
+
 ```json
 {
   "id": 1,
@@ -79,6 +81,7 @@
 링크 상세 정보와 장소 아이템 목록을 조회합니다.
 
 **Response** `200 OK`
+
 ```json
 {
   "id": 1,
@@ -138,6 +141,7 @@
 장소 아이템 단일 조회
 
 **Response** `200 OK`
+
 ```json
 {
   "id": 1,
@@ -164,6 +168,7 @@
 장소 아이템 수정 (사용자 메모, 순서, 삭제 상태만 수정 가능)
 
 **Request**
+
 ```json
 {
   "user_memo": "예약 필수!",
@@ -175,6 +180,7 @@
 > ⚠️ 최소 하나의 필드는 포함되어야 합니다.
 
 **Response** `200 OK`
+
 ```json
 {
   "id": 1,
@@ -208,6 +214,7 @@
 장소 아이템 삭제 (Soft Delete)
 
 **Response** `200 OK`
+
 ```json
 {
   "success": true
@@ -227,6 +234,7 @@
 장소 순서 일괄 변경
 
 **Request**
+
 ```json
 {
   "item_orders": [
@@ -238,6 +246,7 @@
 ```
 
 **Response** `200 OK`
+
 ```json
 {
   "success": true,
@@ -258,26 +267,29 @@
 ## 📊 상태 값 (Enums)
 
 ### LinkStatus
-| 값 | 설명 |
-|---|------|
-| `PENDING` | 분석 대기 중 |
+
+| 값           | 설명         |
+| ------------ | ------------ |
+| `PENDING`    | 분석 대기 중 |
 | `PROCESSING` | 분석 진행 중 |
-| `READY` | 분석 완료 |
-| `FAILED` | 분석 실패 |
+| `READY`      | 분석 완료    |
+| `FAILED`     | 분석 실패    |
 
 ### LinkStage
-| 값 | 설명 | 진행률 |
-|---|------|-------|
-| `fetch_meta` | 영상 정보 가져오는 중 | ~10% |
-| `transcribe` | 자막 추출 중 | ~40% |
-| `extract_places` | 장소 추출 중 | ~70% |
-| `summarize` | 여행 계획 생성 중 | ~95% |
+
+| 값               | 설명                  | 진행률 |
+| ---------------- | --------------------- | ------ |
+| `fetch_meta`     | 영상 정보 가져오는 중 | ~10%   |
+| `transcribe`     | 자막 추출 중          | ~40%   |
+| `extract_places` | 장소 추출 중          | ~70%   |
+| `summarize`      | 여행 계획 생성 중     | ~95%   |
 
 ### PlaceCategory
-| 값 | 설명 |
-|---|------|
-| `TNA` | 티켓/관광지/투어 |
-| `LODGING` | 숙소 |
+
+| 값        | 설명             |
+| --------- | ---------------- |
+| `TNA`     | 티켓/관광지/투어 |
+| `LODGING` | 숙소             |
 
 ---
 
@@ -286,26 +298,28 @@
 Supabase Realtime을 사용하여 링크 상태 변경을 실시간으로 수신합니다.
 
 ```typescript
-import { useLinkRealtime } from "@/hooks/useLinkRealtime";
+import { useLinkRealtime } from "@/hooks/use-link-realtime";
 
 function LinkPage({ linkId }: { linkId: number }) {
   const { link, isLoading, isSubscribed, error } = useLinkRealtime(linkId, {
-    immediate: true,           // 즉시 초기 데이터 fetch
-    unsubscribeOnComplete: true // READY/FAILED면 구독 해제
+    immediate: true, // 즉시 초기 데이터 fetch
+    unsubscribeOnComplete: true, // READY/FAILED면 구독 해제
   });
 
   if (isLoading) return <div>로딩 중...</div>;
   if (error) return <div>에러: {error.message}</div>;
-  
+
   return (
     <div>
-      <p>상태: {link?.status} {isSubscribed && "🟢 실시간 연결됨"}</p>
+      <p>
+        상태: {link?.status} {isSubscribed && "🟢 실시간 연결됨"}
+      </p>
       <p>진행률: {link?.progress_pct}%</p>
       <p>{link?.status_message}</p>
-      
+
       {link?.status === "READY" && (
         <ul>
-          {link.link_place_items.map(item => (
+          {link.link_place_items.map((item) => (
             <li key={item.id}>{item.place_name}</li>
           ))}
         </ul>
@@ -346,11 +360,10 @@ src/
 ├── services/
 │   └── links.ts                        # 클라이언트 사이드 서비스
 ├── hooks/
-│   ├── useLinkRealtime.ts              # Realtime 훅 ⭐
-│   └── useLinkPolling.ts               # 폴링 훅 (대체용)
+│   ├── use-link-realtime.ts            # Realtime 훅 ⭐
+│   └── use-link-polling.ts             # 폴링 훅 (대체용)
 ├── types/
 │   └── database.ts                     # DB 타입
 └── mocks/
     └── data.ts                         # 더미 데이터
 ```
-
