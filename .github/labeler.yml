@@ -1,0 +1,17 @@
+enable:
+  issues: true
+  prs: true
+
+labels:
+  deploy:
+    - "^deploy:"
+  docs:
+    - "^docs:"
+  feat:
+    - "^feat:"
+  init:
+    - "^init:"
+  refactor:
+    - "^refactor:"
+  style:
+    - "^style:"
