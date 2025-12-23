@@ -60,22 +60,22 @@ export function useLinkPolling(
         .single();
 
       if (fetchError) throw fetchError;
+      if (!data) throw new Error("Link not found");
 
       // items를 order_index로 정렬하고 삭제된 것 필터링
+      const linkData = data as LinkRow & { link_place_items?: LinkPlaceItemRow[] };
       const sortedData: LinkWithItems = {
-        ...data,
-        link_place_items: (data.link_place_items || [])
-          .filter((item: LinkPlaceItemRow) => !item.is_deleted)
-          .sort((a: LinkPlaceItemRow, b: LinkPlaceItemRow) => 
-            (a.order_index ?? 0) - (b.order_index ?? 0)
-          ),
+        ...linkData,
+        link_place_items: (linkData.link_place_items || [])
+          .filter((item) => !item.is_deleted)
+          .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)),
       };
 
       setLink(sortedData);
       setError(null);
 
       // READY 또는 FAILED면 폴링 중지
-      if (stopOnComplete && (data.status === "READY" || data.status === "FAILED")) {
+      if (stopOnComplete && (linkData.status === "READY" || linkData.status === "FAILED")) {
         stopPolling();
       }
     } catch (err) {

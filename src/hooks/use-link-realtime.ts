@@ -53,15 +53,14 @@ export function useLinkRealtime(
         .single();
 
       if (fetchError) throw fetchError;
+      if (!data) throw new Error("Link not found");
 
+      const linkData = data as LinkRow & { link_place_items?: LinkPlaceItemRow[] };
       const sortedData: LinkWithItems = {
-        ...data,
-        link_place_items: (data.link_place_items || [])
-          .filter((item: LinkPlaceItemRow) => !item.is_deleted)
-          .sort(
-            (a: LinkPlaceItemRow, b: LinkPlaceItemRow) =>
-              (a.order_index ?? 0) - (b.order_index ?? 0)
-          ),
+        ...linkData,
+        link_place_items: (linkData.link_place_items || [])
+          .filter((item) => !item.is_deleted)
+          .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)),
       };
 
       setLink(sortedData);
