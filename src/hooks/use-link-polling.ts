@@ -39,14 +39,23 @@ export function useLinkPolling(
   const [isPolling, setIsPolling] = useState(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const supabase = createClient();
+  const supabaseRef = useRef(createClient());
+
+  // 폴링 중지
+  const stopPolling = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setIsPolling(false);
+  }, []);
 
   // 데이터 fetch 함수
   const fetchLink = useCallback(async () => {
     if (!linkId) return;
 
     try {
-      const { data, error: fetchError } = await supabase
+      const { data, error: fetchError } = await supabaseRef.current
         .from("links")
         .select(
           `
@@ -86,7 +95,7 @@ export function useLinkPolling(
     } finally {
       setIsLoading(false);
     }
-  }, [linkId, supabase, stopOnComplete]);
+  }, [linkId, stopOnComplete, stopPolling]);
 
   // 폴링 시작
   const startPolling = useCallback(() => {
@@ -95,15 +104,6 @@ export function useLinkPolling(
     setIsPolling(true);
     intervalRef.current = setInterval(fetchLink, interval);
   }, [fetchLink, interval]);
-
-  // 폴링 중지
-  const stopPolling = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    setIsPolling(false);
-  }, []);
 
   // 수동 refetch
   const refetch = useCallback(async () => {
@@ -123,15 +123,12 @@ export function useLinkPolling(
       fetchLink();
     }
 
-    // PENDING/PROCESSING 상태면 폴링 시작
-    if (link?.status === "PENDING" || link?.status === "PROCESSING" || !link) {
-      startPolling();
-    }
+    startPolling();
 
     return () => {
       stopPolling();
     };
-  }, [linkId]);
+  }, [linkId, immediate, fetchLink, startPolling, stopPolling]);
 
   // link 상태 변경 시 폴링 제어
   useEffect(() => {
@@ -145,7 +142,7 @@ export function useLinkPolling(
     } else if (link.status === "PENDING" || link.status === "PROCESSING") {
       if (!isPolling) startPolling();
     }
-  }, [link?.status, stopOnComplete, isPolling, startPolling, stopPolling]);
+  }, [link, stopOnComplete, isPolling, startPolling, stopPolling]);
 
   return {
     link,
