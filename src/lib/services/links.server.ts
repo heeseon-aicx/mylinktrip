@@ -1,10 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type {
-  LinkRow,
-  LinkPlaceItemRow,
-  LinkInsert,
-  LinkPlaceItemUpdate,
-} from "@/types/database";
+import type { LinkRow, LinkPlaceItemRow } from "@/types/database";
 
 // ============================================
 // Types
@@ -40,7 +35,7 @@ export async function createLink(params: CreateLinkParams): Promise<LinkRow> {
   const supabase = await createClient();
   const videoId = extractYoutubeVideoId(params.youtube_url);
 
-  const insertData: LinkInsert = {
+  const insertData = {
     youtube_url: params.youtube_url,
     youtube_video_id: videoId,
     status: "PENDING",
@@ -50,7 +45,7 @@ export async function createLink(params: CreateLinkParams): Promise<LinkRow> {
 
   const { data, error } = await supabase
     .from("links")
-    .insert(insertData)
+    .insert(insertData as never)
     .select()
     .single();
 
@@ -78,14 +73,17 @@ export async function getLink(linkId: number): Promise<LinkWithItems | null> {
     throw error;
   }
 
+  if (!data) return null;
+
+  const linkData = data as unknown as LinkRow & {
+    link_place_items?: LinkPlaceItemRow[];
+  };
+
   return {
-    ...data,
-    link_place_items: (data.link_place_items || [])
-      .filter((item: LinkPlaceItemRow) => !item.is_deleted)
-      .sort(
-        (a: LinkPlaceItemRow, b: LinkPlaceItemRow) =>
-          (a.order_index ?? 0) - (b.order_index ?? 0)
-      ),
+    ...linkData,
+    link_place_items: (linkData.link_place_items || [])
+      .filter((item) => !item.is_deleted)
+      .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)),
   };
 }
 
@@ -147,7 +145,7 @@ export async function updateLinkItem(
 ): Promise<LinkPlaceItemRow> {
   const supabase = await createClient();
 
-  const updateData: LinkPlaceItemUpdate = {};
+  const updateData: Record<string, unknown> = {};
   if (params.user_memo !== undefined) updateData.user_memo = params.user_memo;
   if (params.order_index !== undefined)
     updateData.order_index = params.order_index;
@@ -155,7 +153,7 @@ export async function updateLinkItem(
 
   const { data, error } = await supabase
     .from("link_place_items")
-    .update(updateData)
+    .update(updateData as never)
     .eq("id", itemId)
     .select()
     .single();
@@ -172,7 +170,7 @@ export async function deleteLinkItem(itemId: number): Promise<void> {
 
   const { error } = await supabase
     .from("link_place_items")
-    .update({ is_deleted: true })
+    .update({ is_deleted: true } as never)
     .eq("id", itemId);
 
   if (error) throw error;
@@ -190,7 +188,7 @@ export async function reorderLinkItems(
   const updates = items.map((item) =>
     supabase
       .from("link_place_items")
-      .update({ order_index: item.order_index })
+      .update({ order_index: item.order_index } as never)
       .eq("id", item.id)
       .eq("link_id", linkId)
   );
