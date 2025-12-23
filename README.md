@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MyLinkTrip 🎬✈️
 
-## Getting Started
+유튜브 여행 영상을 AI가 분석해서 여행 계획으로 바꿔주는 서비스
 
-First, run the development server:
+## 주요 기능
+
+### 🎯 장소 추출
+
+유튜브 영상에서 언급된 장소들을 AI가 자동으로 추출합니다.
+
+### 📝 메모 추가
+
+각 장소에 나만의 메모를 추가할 수 있습니다.
+
+### 🔗 예약 연결
+
+추출된 장소를 구글맵, 마이리얼트립에서 바로 확인할 수 있습니다.
+
+### 📱 유튜브 플레이어
+
+- **데스크톱**: 플로팅 플레이어로 영상 보면서 장소 확인
+- **모바일**: 바텀시트 플레이어로 편리하게 시청
+
+### ⏱️ 타임스탬프 연동
+
+영상에서 해당 장소가 언급된 시점으로 바로 이동할 수 있습니다.
+
+## 기술 스택
+
+- **Frontend**: Next.js 14, React, TypeScript, Emotion
+- **Backend**: Supabase (Database, Edge Functions)
+- **AI**: Google Gemini API
+- **Styling**: Emotion (CSS-in-JS)
+
+## 시작하기
+
+### 환경 변수 설정
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+필요한 환경 변수:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 개발 서버 실행
 
-## Learn More
+```bash
+pnpm install
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+[http://localhost:3000](http://localhost:3000)에서 확인할 수 있습니다.
+[https://mylinktrip.vercel.app/](https://mylinktrip.vercel.app/) 배포사이트 입니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 프로젝트 구조
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── _components/        # 페이지 전용 컴포넌트
+│   ├── api/                # API Routes
+│   ├── links/[linkId]/     # 결과 페이지
+│   └── loading/[linkId]/   # 로딩 페이지
+├── features/
+│   └── links/              # 링크 관련 기능
+│       ├── components/     # 컴포넌트
+│       └── hooks.ts        # 커스텀 훅
+├── lib/                    # 유틸리티, 서비스
+└── data/                   # 타입, API 클라이언트
+```
 
-## Deploy on Vercel
+## 디자인 시스템
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+마이리얼트립 스타일을 참고한 디자인:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **장소**: 민트/청록색 (`#1A9E85`)
+- **숙소**: 주황색 (`#E85D3B`)
+- **메모**: 노란색 (`#B45309`)
+
+## 라이선스
+
+MIT License
+
