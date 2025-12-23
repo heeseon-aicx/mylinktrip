@@ -392,9 +392,9 @@ export default function LoadingPage() {
       {/* 단계 체크리스트 */}
       <StagesWrapper>
         <StagesList>
-          <StageItem stage="fetch_meta" currentStage={link.stage} progress={link.progress_pct} label="영상 정보 확인" threshold={10} />
-          <StageItem stage="extract_places" currentStage={link.stage} progress={link.progress_pct} label="장소 추출" threshold={30} />
-          <StageItem stage="persist" currentStage={link.stage} progress={link.progress_pct} label="여행 계획 정리" threshold={85} />
+          <StageItem stage="fetch_meta" currentStage={link.stage} progress={link.progress_pct} label="영상 정보 확인" stageOrder={1} />
+          <StageItem stage="extract_places" currentStage={link.stage} progress={link.progress_pct} label="장소 추출" stageOrder={2} />
+          <StageItem stage="persist" currentStage={link.stage} progress={link.progress_pct} label="여행 계획 정리" stageOrder={3} />
         </StagesList>
       </StagesWrapper>
 
@@ -413,12 +413,23 @@ interface StageItemProps {
   currentStage: LinkStage | null;
   progress: number;
   label: string;
-  threshold: number;
+  stageOrder: number; // 1, 2, 3
 }
 
-function StageItem({ stage, currentStage, progress, label, threshold }: StageItemProps) {
+// stage 순서 매핑
+const STAGE_ORDER: Record<LinkStage, number> = {
+  fetch_meta: 1,
+  extract_places: 2,
+  persist: 3,
+};
+
+function StageItem({ stage, currentStage, progress, label, stageOrder }: StageItemProps) {
+  const currentOrder = currentStage ? STAGE_ORDER[currentStage] : 0;
+  
+  // 현재 stage의 순서가 이 stage보다 크면 완료
+  // progress가 100이면 모든 단계 완료
+  const isComplete = progress >= 100 || currentOrder > stageOrder;
   const isActive = currentStage === stage;
-  const isComplete = progress >= threshold + 20;
 
   const status = isComplete ? "complete" : isActive ? "active" : "pending";
 
