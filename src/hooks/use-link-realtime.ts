@@ -45,17 +45,21 @@ export function useLinkRealtime(
       setIsLoading(true);
       const { data, error: fetchError } = await supabase
         .from("links")
-        .select(`
+        .select(
+          `
           *,
           link_place_items (*)
-        `)
+        `
+        )
         .eq("id", linkId)
         .single();
 
       if (fetchError) throw fetchError;
       if (!data) throw new Error("Link not found");
 
-      const linkData = data as LinkRow & { link_place_items?: LinkPlaceItemRow[] };
+      const linkData = data as LinkRow & {
+        link_place_items?: LinkPlaceItemRow[];
+      };
       const sortedData: LinkWithItems = {
         ...linkData,
         link_place_items: (linkData.link_place_items || [])
@@ -108,10 +112,7 @@ export function useLinkRealtime(
               const newData = payload.new as LinkRow;
 
               // READY/FAILED면 items도 다시 fetch
-              if (
-                newData.status === "READY" ||
-                newData.status === "FAILED"
-              ) {
+              if (newData.status === "READY" || newData.status === "FAILED") {
                 fetchLink(); // 전체 데이터 다시 fetch (items 포함)
 
                 // 완료 시 구독 해제
@@ -167,4 +168,3 @@ export function useLinkRealtime(
     refetch: fetchLink,
   };
 }
-

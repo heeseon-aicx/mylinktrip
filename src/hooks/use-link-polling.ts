@@ -31,11 +31,7 @@ export function useLinkPolling(
   linkId: number | null,
   options: UseLinkPollingOptions = {}
 ): UseLinkPollingResult {
-  const {
-    interval = 2000,
-    stopOnComplete = true,
-    immediate = true,
-  } = options;
+  const { interval = 2000, stopOnComplete = true, immediate = true } = options;
 
   const [link, setLink] = useState<LinkWithItems | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,10 +48,12 @@ export function useLinkPolling(
     try {
       const { data, error: fetchError } = await supabase
         .from("links")
-        .select(`
+        .select(
+          `
           *,
           link_place_items (*)
-        `)
+        `
+        )
         .eq("id", linkId)
         .single();
 
@@ -63,7 +61,9 @@ export function useLinkPolling(
       if (!data) throw new Error("Link not found");
 
       // items를 order_index로 정렬하고 삭제된 것 필터링
-      const linkData = data as LinkRow & { link_place_items?: LinkPlaceItemRow[] };
+      const linkData = data as LinkRow & {
+        link_place_items?: LinkPlaceItemRow[];
+      };
       const sortedData: LinkWithItems = {
         ...linkData,
         link_place_items: (linkData.link_place_items || [])
@@ -75,7 +75,10 @@ export function useLinkPolling(
       setError(null);
 
       // READY 또는 FAILED면 폴링 중지
-      if (stopOnComplete && (linkData.status === "READY" || linkData.status === "FAILED")) {
+      if (
+        stopOnComplete &&
+        (linkData.status === "READY" || linkData.status === "FAILED")
+      ) {
         stopPolling();
       }
     } catch (err) {
@@ -134,7 +137,10 @@ export function useLinkPolling(
   useEffect(() => {
     if (!link) return;
 
-    if (stopOnComplete && (link.status === "READY" || link.status === "FAILED")) {
+    if (
+      stopOnComplete &&
+      (link.status === "READY" || link.status === "FAILED")
+    ) {
       stopPolling();
     } else if (link.status === "PENDING" || link.status === "PROCESSING") {
       if (!isPolling) startPolling();
@@ -151,4 +157,3 @@ export function useLinkPolling(
     stopPolling,
   };
 }
-
