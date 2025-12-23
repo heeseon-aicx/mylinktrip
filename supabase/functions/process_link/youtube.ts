@@ -1,3 +1,5 @@
+import "./deno.d.ts";
+
 /**
  * YouTube URL에서 Video ID 추출
  */

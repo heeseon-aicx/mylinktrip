@@ -1,13 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
-import type { LinkRow, LinkPlaceItemRow } from "@/types/database";
+import {
+  LinkRow,
+  LinkPlaceItemRow,
+  LinkWithPlaces,
+  toLinkRow,
+  toLinkPlaceItemRow,
+  toLinkWithPlaces,
+} from "@/types/database";
 
 // ============================================
 // Types
 // ============================================
 
-export interface LinkWithItems extends LinkRow {
-  link_place_items: LinkPlaceItemRow[];
-}
+export type { LinkWithPlaces as LinkWithItems };
 
 export interface CreateLinkParams {
   youtube_url: string;
@@ -35,36 +40,37 @@ export async function createLink(params: CreateLinkParams): Promise<LinkRow> {
   const supabase = await createClient();
   const videoId = extractYoutubeVideoId(params.youtube_url);
 
-  const insertData = {
-    youtube_url: params.youtube_url,
-    youtube_video_id: videoId,
-    status: "PENDING",
-    progress_pct: 0,
-    status_message: "분석 대기 중...",
-  };
-
   const { data, error } = await supabase
     .from("links")
-    .insert(insertData as never)
+    .insert({
+      youtube_url: params.youtube_url,
+      youtube_video_id: videoId,
+      status: "PENDING",
+      progress_pct: 0,
+      status_message: "분석 대기 중...",
+    })
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+
+  return toLinkRow(data);
 }
 
 /**
  * 링크 상세 조회 (장소 아이템 포함)
  */
-export async function getLink(linkId: number): Promise<LinkWithItems | null> {
+export async function getLink(linkId: number): Promise<LinkWithPlaces | null> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("links")
-    .select(`
+    .select(
+      `
       *,
       link_place_items (*)
-    `)
+    `
+    )
     .eq("id", linkId)
     .single();
 
@@ -75,13 +81,12 @@ export async function getLink(linkId: number): Promise<LinkWithItems | null> {
 
   if (!data) return null;
 
-  const linkData = data as unknown as LinkRow & {
-    link_place_items?: LinkPlaceItemRow[];
-  };
+  // 타입 가드로 변환
+  const linkData = toLinkWithPlaces(data);
 
   return {
     ...linkData,
-    link_place_items: (linkData.link_place_items || [])
+    link_place_items: linkData.link_place_items
       .filter((item) => !item.is_deleted)
       .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)),
   };
@@ -108,7 +113,16 @@ export async function getLinkStatus(
     if (error.code === "PGRST116") return null;
     throw error;
   }
-  return data;
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    status: data.status,
+    progress_pct: data.progress_pct,
+    stage: data.stage,
+    status_message: data.status_message,
+  };
 }
 
 // ============================================
@@ -133,7 +147,10 @@ export async function getLinkItem(
     if (error.code === "PGRST116") return null;
     throw error;
   }
-  return data;
+
+  if (!data) return null;
+
+  return toLinkPlaceItemRow(data);
 }
 
 /**
@@ -149,17 +166,19 @@ export async function updateLinkItem(
   if (params.user_memo !== undefined) updateData.user_memo = params.user_memo;
   if (params.order_index !== undefined)
     updateData.order_index = params.order_index;
-  if (params.is_deleted !== undefined) updateData.is_deleted = params.is_deleted;
+  if (params.is_deleted !== undefined)
+    updateData.is_deleted = params.is_deleted;
 
   const { data, error } = await supabase
     .from("link_place_items")
-    .update(updateData as never)
+    .update(updateData)
     .eq("id", itemId)
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+
+  return toLinkPlaceItemRow(data);
 }
 
 /**
@@ -170,7 +189,7 @@ export async function deleteLinkItem(itemId: number): Promise<void> {
 
   const { error } = await supabase
     .from("link_place_items")
-    .update({ is_deleted: true } as never)
+    .update({ is_deleted: true })
     .eq("id", itemId);
 
   if (error) throw error;
@@ -188,7 +207,7 @@ export async function reorderLinkItems(
   const updates = items.map((item) =>
     supabase
       .from("link_place_items")
-      .update({ order_index: item.order_index } as never)
+      .update({ order_index: item.order_index })
       .eq("id", item.id)
       .eq("link_id", linkId)
   );
@@ -230,4 +249,3 @@ export function extractYoutubeVideoId(url: string): string | null {
 export function isValidYoutubeUrl(url: string): boolean {
   return extractYoutubeVideoId(url) !== null;
 }
-

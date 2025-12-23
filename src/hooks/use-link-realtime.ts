@@ -2,7 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { LinkRow, LinkPlaceItemRow } from "@/types/database";
+import {
+  LinkRow,
+  LinkPlaceItemRow,
+  isLinkWithPlaces,
+  isLinkRow,
+} from "@/types/database";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 interface LinkWithItems extends LinkRow {
@@ -57,12 +62,14 @@ export function useLinkRealtime(
       if (fetchError) throw fetchError;
       if (!data) throw new Error("Link not found");
 
-      const linkData = data as LinkRow & {
-        link_place_items?: LinkPlaceItemRow[];
-      };
+      // 타입 가드로 검증
+      if (!isLinkWithPlaces(data)) {
+        throw new Error("Invalid data format");
+      }
+
       const sortedData: LinkWithItems = {
-        ...linkData,
-        link_place_items: (linkData.link_place_items || [])
+        ...data,
+        link_place_items: data.link_place_items
           .filter((item) => !item.is_deleted)
           .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)),
       };
@@ -106,10 +113,13 @@ export function useLinkRealtime(
           (payload) => {
             console.log("[Realtime] Link updated:", payload);
 
+            const newData = payload.new;
+
+            // 타입 가드로 검증
+            if (!isLinkRow(newData)) return;
+
             setLink((prev) => {
               if (!prev) return prev;
-
-              const newData = payload.new as LinkRow;
 
               // READY/FAILED면 items도 다시 fetch
               if (newData.status === "READY" || newData.status === "FAILED") {

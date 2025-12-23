@@ -2,7 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { LinkRow, LinkPlaceItemRow } from "@/types/database";
+import {
+  LinkRow,
+  LinkPlaceItemRow,
+  isLinkWithPlaces,
+  isLinkRow,
+} from "@/types/database";
 
 interface LinkWithItems extends LinkRow {
   link_place_items: LinkPlaceItemRow[];
@@ -69,13 +74,15 @@ export function useLinkPolling(
       if (fetchError) throw fetchError;
       if (!data) throw new Error("Link not found");
 
+      // 타입 가드로 검증
+      if (!isLinkWithPlaces(data)) {
+        throw new Error("Invalid data format");
+      }
+
       // items를 order_index로 정렬하고 삭제된 것 필터링
-      const linkData = data as LinkRow & {
-        link_place_items?: LinkPlaceItemRow[];
-      };
       const sortedData: LinkWithItems = {
-        ...linkData,
-        link_place_items: (linkData.link_place_items || [])
+        ...data,
+        link_place_items: data.link_place_items
           .filter((item) => !item.is_deleted)
           .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)),
       };
@@ -86,7 +93,7 @@ export function useLinkPolling(
       // READY 또는 FAILED면 폴링 중지
       if (
         stopOnComplete &&
-        (linkData.status === "READY" || linkData.status === "FAILED")
+        (data.status === "READY" || data.status === "FAILED")
       ) {
         stopPolling();
       }

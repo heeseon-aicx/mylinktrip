@@ -57,7 +57,8 @@ export async function createLink(params: CreateLinkParams): Promise<LinkRow> {
     .single();
 
   if (error) throw error;
-  return data;
+  if (!data) throw new Error("No data returned");
+  return data as LinkRow;
 }
 
 /**
@@ -66,22 +67,27 @@ export async function createLink(params: CreateLinkParams): Promise<LinkRow> {
 export async function getLink(linkId: number): Promise<LinkWithItems> {
   const { data, error } = await supabase
     .from("links")
-    .select(`
+    .select(
+      `
       *,
       link_place_items (*)
-    `)
+    `
+    )
     .eq("id", linkId)
     .single();
 
   if (error) throw error;
+  if (!data) throw new Error("Link not found");
 
   // items 정렬 및 삭제된 것 필터링
+  const linkData = data as unknown as LinkWithItems;
   return {
-    ...data,
-    link_place_items: (data.link_place_items || [])
+    ...linkData,
+    link_place_items: (linkData.link_place_items || [])
       .filter((item: LinkPlaceItemRow) => !item.is_deleted)
-      .sort((a: LinkPlaceItemRow, b: LinkPlaceItemRow) => 
-        (a.order_index ?? 0) - (b.order_index ?? 0)
+      .sort(
+        (a: LinkPlaceItemRow, b: LinkPlaceItemRow) =>
+          (a.order_index ?? 0) - (b.order_index ?? 0)
       ),
   };
 }
@@ -89,7 +95,11 @@ export async function getLink(linkId: number): Promise<LinkWithItems> {
 /**
  * 링크 상태만 조회 (폴링용, 가벼움)
  */
-export async function getLinkStatus(linkId: number): Promise<Pick<LinkRow, "id" | "status" | "progress_pct" | "stage" | "status_message">> {
+export async function getLinkStatus(
+  linkId: number
+): Promise<
+  Pick<LinkRow, "id" | "status" | "progress_pct" | "stage" | "status_message">
+> {
   const { data, error } = await supabase
     .from("links")
     .select("id, status, progress_pct, stage, status_message")
@@ -97,7 +107,11 @@ export async function getLinkStatus(linkId: number): Promise<Pick<LinkRow, "id" 
     .single();
 
   if (error) throw error;
-  return data;
+  if (!data) throw new Error("Link not found");
+  return data as Pick<
+    LinkRow,
+    "id" | "status" | "progress_pct" | "stage" | "status_message"
+  >;
 }
 
 /**
@@ -110,8 +124,10 @@ export async function updateLinkItem(
   const updateData: LinkPlaceItemUpdate = {};
 
   if (params.user_memo !== undefined) updateData.user_memo = params.user_memo;
-  if (params.order_index !== undefined) updateData.order_index = params.order_index;
-  if (params.is_deleted !== undefined) updateData.is_deleted = params.is_deleted;
+  if (params.order_index !== undefined)
+    updateData.order_index = params.order_index;
+  if (params.is_deleted !== undefined)
+    updateData.is_deleted = params.is_deleted;
 
   const { data, error } = await supabase
     .from("link_place_items")
@@ -121,7 +137,8 @@ export async function updateLinkItem(
     .single();
 
   if (error) throw error;
-  return data;
+  if (!data) throw new Error("Item not found");
+  return data as LinkPlaceItemRow;
 }
 
 /**
@@ -194,7 +211,10 @@ export function formatTimestamp(seconds: number | null): string {
 /**
  * 유튜브 타임스탬프 링크 생성
  */
-export function getYoutubeTimestampUrl(videoId: string, seconds: number): string {
+export function getYoutubeTimestampUrl(
+  videoId: string,
+  seconds: number
+): string {
   return `https://www.youtube.com/watch?v=${videoId}&t=${seconds}s`;
 }
 
@@ -210,4 +230,3 @@ export function getMrtSearchUrl(
   const query = encodeURIComponent(`${city || ""} ${placeName}`.trim());
   return `https://www.myrealtrip.com/${type}?search=${query}`;
 }
-
