@@ -19,8 +19,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// 120초 후 자기 호출 (30초 여유 확보)
-const MAX_EXECUTION_TIME_MS = 120_000;
+// Gemini 호출 전 시간 체크 (최소 60초 여유 필요)
+const MAX_EXECUTION_TIME_MS = 90_000;
+// Gemini 호출에 필요한 최소 시간 (초과하면 재호출)
+const MIN_TIME_FOR_GEMINI_MS = 50_000;
 // 청크 간 딜레이 (Rate Limit 방지)
 const CHUNK_DELAY_MS = 1500;
 
@@ -288,11 +290,13 @@ Deno.serve(async (req) => {
     // ========================================
     for (let i = startChunkIndex; i < chunks.length; i++) {
       const elapsed = Date.now() - startTime;
+      const remainingTime = 150_000 - elapsed; // Free Plan 150초 기준
 
-      // 시간 초과 체크: 다음 청크 처리할 시간이 부족하면 자기 호출
-      if (elapsed > MAX_EXECUTION_TIME_MS) {
+      // 시간 초과 체크 1: 이미 90초 초과
+      // 시간 초과 체크 2: Gemini 호출할 여유 시간이 없음 (50초 미만)
+      if (elapsed > MAX_EXECUTION_TIME_MS || remainingTime < MIN_TIME_FOR_GEMINI_MS) {
         console.log(
-          `[process_link_v2] Time limit approaching (${elapsed}ms), saving progress and invoking self`
+          `[process_link_v2] Time limit approaching (elapsed: ${elapsed}ms, remaining: ${remainingTime}ms), saving progress and invoking self`
         );
 
         // 현재까지 결과 저장
@@ -314,7 +318,7 @@ Deno.serve(async (req) => {
 
       const chunk = chunks[i];
       console.log(
-        `[process_link_v2] Processing chunk ${i + 1}/${chunks.length} (${chunk.startSec}s-${chunk.endSec}s)`
+        `[process_link_v2] Processing chunk ${i + 1}/${chunks.length} (${chunk.startSec}s-${chunk.endSec}s), elapsed: ${elapsed}ms`
       );
 
       const result = await analyzeChunk(youtubeUrl, chunk);
