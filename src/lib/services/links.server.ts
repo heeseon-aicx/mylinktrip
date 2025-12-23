@@ -65,13 +65,13 @@ export async function createLink(params: CreateLinkParams): Promise<LinkRow> {
 }
 
 /**
- * Edge Function 호출 (process_link)
+ * Edge Function 호출 (process_link_v2 - Self-Continuation)
  * Admin client 사용 (service_role key 필요)
  */
 async function invokeProcessLink(linkId: number): Promise<void> {
   const supabase = createAdminClient();
   
-  const { error } = await supabase.functions.invoke("process_link", {
+  const { error } = await supabase.functions.invoke("process_link_v2", {
     body: { link_id: linkId },
   });
 
