@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import styled from "@emotion/styled";
 import {
   DndContext,
   closestCenter,
@@ -28,6 +29,52 @@ interface PlaceListDnDProps {
   onDelete: (itemId: number) => () => void;
   onReorder: (orderedItems: { id: number; order_index: number }[]) => void;
 }
+
+const SortableWrapper = styled.div<{ isDragging: boolean }>`
+  position: relative;
+  opacity: ${(props) => (props.isDragging ? 0.5 : 1)};
+  z-index: ${(props) => (props.isDragging ? 1000 : 1)};
+
+  &:hover .drag-handle {
+    opacity: 1;
+  }
+`;
+
+const DragHandle = styled.div`
+  position: absolute;
+  left: 0;
+  top: 20px;
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+  &:active {
+    cursor: grabbing;
+  }
+`;
+
+const DragHandleInner = styled.div`
+  width: 32px;
+  height: 32px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    color: var(--color-gray-400);
+  }
+`;
 
 export function PlaceListDnD({
   items,
@@ -80,15 +127,8 @@ export function PlaceListDnD({
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext
-        items={localItems.map((item) => item.id)}
-        strategy={verticalListSortingStrategy}
-      >
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={localItems.map((item) => item.id)} strategy={verticalListSortingStrategy}>
         <div>
           {localItems.map((item, index) => (
             <SortablePlaceCard
@@ -118,65 +158,26 @@ interface SortablePlaceCardProps {
   onDelete: () => void;
 }
 
-function SortablePlaceCard({
-  item,
-  videoId,
-  isLast,
-  onUpdateMemo,
-  onDelete,
-}: SortablePlaceCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: item.id });
+function SortablePlaceCard({ item, videoId, isLast, onUpdateMemo, onDelete }: SortablePlaceCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 1000 : 1,
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="relative group"
-      {...attributes}
-    >
+    <SortableWrapper ref={setNodeRef} style={style} isDragging={isDragging} {...attributes}>
       {/* 드래그 핸들 - 타임라인 아이콘 위에 오버레이 */}
-      <div
-        {...listeners}
-        className="absolute left-0 top-5 z-10 w-12 h-12 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
-      >
-        <div className="w-8 h-8 bg-white/90 rounded-lg shadow-md flex items-center justify-center">
-          <svg
-            className="w-4 h-4 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 8h16M4 16h16"
-            />
+      <DragHandle className="drag-handle" {...listeners}>
+        <DragHandleInner>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 8h16M4 16h16" />
           </svg>
-        </div>
-      </div>
+        </DragHandleInner>
+      </DragHandle>
 
-      <PlaceCard
-        item={item}
-        videoId={videoId}
-        isLast={isLast}
-        onUpdateMemo={onUpdateMemo}
-        onDelete={onDelete}
-      />
-    </div>
+      <PlaceCard item={item} videoId={videoId} isLast={isLast} onUpdateMemo={onUpdateMemo} onDelete={onDelete} />
+    </SortableWrapper>
   );
 }
