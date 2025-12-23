@@ -1,7 +1,7 @@
 import "./deno.d.ts";
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-type LinkStage = "fetch_meta" | "transcribe" | "extract_places" | "summarize" | "persist";
+type LinkStage = "fetch_meta" | "extract_places" | "persist";
 
 /**
  * 진행 상태 업데이트

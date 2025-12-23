@@ -5,9 +5,8 @@
 export type LinkStatus = "PENDING" | "PROCESSING" | "READY" | "FAILED";
 export type LinkStage =
   | "fetch_meta"
-  | "transcribe"
   | "extract_places"
-  | "summarize";
+  | "persist";
 export type PlaceCategory = "TNA" | "LODGING";
 
 // ============================================

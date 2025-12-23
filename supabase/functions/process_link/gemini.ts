@@ -16,29 +16,25 @@ export interface GeminiPlace {
   confidence?: number;
 }
 
-const EXTRACTION_PROMPT = `당신은 여행 영상 분석 전문가입니다. 이 YouTube 영상을 분석하여 영상에서 언급된 모든 여행 장소를 추출해주세요.
+const EXTRACTION_PROMPT = `당신은 여행 영상 분석 전문가입니다. 이 YouTube 영상을 분석하여 영상에서 언급된 여행 장소를 추출해주세요.
 
-## 출력 규칙
-1. 반드시 아래 JSON 형식만 출력하세요 (다른 텍스트 없이)
-2. category는 반드시 "TNA" (체험/관광/맛집) 또는 "LODGING" (숙소/호텔) 중 하나
-3. 타임라인은 초 단위 (영상에서 해당 장소가 언급되는 시점, 알 수 없으면 null)
-4. 중복 장소는 병합하세요
-5. 최소 1개 이상의 장소를 추출하세요
-6. 구체적인 장소명을 사용하세요 (예: "시부야 스크램블 교차로", "이치란 라멘 시부야점")
+## 핵심 규칙
+1. category: "TNA" (관광/맛집/체험) 또는 "LODGING" (숙소)
+2. youtuber_comment: 반드시 50자 이내의 짧은 한 줄 요약
+3. 중복 장소는 제외
+4. 구체적인 장소명 사용 (예: "후시미이나리 신사", "이치란 라멘")
 
-## 출력 형식
+## 출력 예시
 {
-  "plan_title": "영상 제목 기반 여행 계획명 (예: 도쿄 3박4일 맛집 투어)",
+  "plan_title": "교토 3박4일 여행",
   "places": [
     {
-      "place_name": "장소의 정확한 이름",
+      "place_name": "후시미이나리 신사",
       "category": "TNA",
       "timeline_start_sec": 120,
-      "timeline_end_sec": 180,
       "country": "일본",
-      "city": "도쿄",
-      "youtuber_comment": "유튜버가 해당 장소에 대해 언급한 핵심 한 줄 코멘트",
-      "confidence": 0.9
+      "city": "교토",
+      "youtuber_comment": "붉은 토리이 터널이 인상적, 24시간 방문 가능"
     }
   ]
 }`;
@@ -46,6 +42,69 @@ const EXTRACTION_PROMPT = `당신은 여행 영상 분석 전문가입니다. �
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 const CHUNK_DURATION_SEC = 300; // 5분 단위
+
+/**
+ * Gemini Structured Output용 JSON Schema
+ * https://ai.google.dev/gemini-api/docs/structured-output
+ */
+const RESPONSE_SCHEMA = {
+  type: "object",
+  properties: {
+    plan_title: {
+      type: "string",
+      description: "영상 제목 기반 여행 계획명",
+      maxLength: 50,
+    },
+    places: {
+      type: "array",
+      description: "영상에서 추출한 여행 장소 목록",
+      items: {
+        type: "object",
+        properties: {
+          place_name: {
+            type: "string",
+            description: "장소의 정확한 이름",
+            maxLength: 100,
+          },
+          category: {
+            type: "string",
+            enum: ["TNA", "LODGING"],
+            description: "TNA: 관광/맛집/체험, LODGING: 숙소",
+          },
+          timeline_start_sec: {
+            type: "integer",
+            description: "장소 언급 시작 시점 (초)",
+          },
+          timeline_end_sec: {
+            type: "integer",
+            description: "장소 언급 종료 시점 (초)",
+          },
+          country: {
+            type: "string",
+            description: "국가명",
+            maxLength: 20,
+          },
+          city: {
+            type: "string",
+            description: "도시명",
+            maxLength: 30,
+          },
+          youtuber_comment: {
+            type: "string",
+            description: "유튜버의 짧은 한 줄 코멘트 (50자 이내)",
+            maxLength: 80,
+          },
+          confidence: {
+            type: "number",
+            description: "추출 신뢰도 (0.0 ~ 1.0)",
+          },
+        },
+        required: ["place_name", "category"],
+      },
+    },
+  },
+  required: ["plan_title", "places"],
+};
 
 /**
  * 지연 함수
@@ -117,6 +176,7 @@ async function analyzeChunk(
             temperature: 0.2,
             maxOutputTokens: 8192,
             responseMimeType: "application/json",
+            responseSchema: RESPONSE_SCHEMA,
           },
         }),
       });
@@ -147,28 +207,48 @@ async function analyzeChunk(
 
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!text) {
+        // finishReason 체크 (MAX_TOKENS 등으로 잘린 경우)
+        const finishReason = data.candidates?.[0]?.finishReason;
         console.warn(
-          `[gemini] No text in response for chunk ${chunkIndex + 1}`
+          `[gemini] No text in response for chunk ${chunkIndex + 1}, finishReason: ${finishReason}`
         );
         return null;
       }
 
-      console.log(`[gemini] Chunk ${chunkIndex + 1} response received`);
+      console.log(`[gemini] Chunk ${chunkIndex + 1} response received (${text.length} chars)`);
 
-      // JSON 파싱
+      // JSON 파싱 (구조화된 출력 사용시 깔끔한 JSON 반환)
       try {
-        let jsonText = text;
-        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        let jsonText = text.trim();
+        
+        // 마크다운 코드 블록이 있으면 추출 (fallback)
+        const jsonMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
         if (jsonMatch) {
           jsonText = jsonMatch[1].trim();
         }
+        
+        // 빈 문자열 체크
+        if (!jsonText || jsonText === "") {
+          console.warn(`[gemini] Empty JSON text for chunk ${chunkIndex + 1}`);
+          return null;
+        }
 
-        return JSON.parse(jsonText) as GeminiResult;
+        const result = JSON.parse(jsonText) as GeminiResult;
+        
+        // 결과 유효성 검사
+        if (!result.places || !Array.isArray(result.places)) {
+          console.warn(`[gemini] Invalid result structure for chunk ${chunkIndex + 1}`);
+          return { plan_title: result.plan_title || "", places: [] };
+        }
+        
+        return result;
       } catch (parseError) {
         console.error(
           `[gemini] JSON parse error for chunk ${chunkIndex + 1}:`,
           parseError
         );
+        // 디버깅용: 실제 응답 내용 로그 (처음 500자만)
+        console.error(`[gemini] Raw response (first 500 chars): ${text.substring(0, 500)}`);
         return null;
       }
     } catch (error) {

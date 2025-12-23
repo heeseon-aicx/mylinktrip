@@ -391,9 +391,8 @@ export default function LoadingPage() {
       <StagesWrapper>
         <StagesList>
           <StageItem stage="fetch_meta" currentStage={link.stage} progress={link.progress_pct} label="영상 정보 확인" threshold={10} />
-          <StageItem stage="transcribe" currentStage={link.stage} progress={link.progress_pct} label="자막 분석" threshold={30} />
-          <StageItem stage="extract_places" currentStage={link.stage} progress={link.progress_pct} label="장소 추출" threshold={70} />
-          <StageItem stage="summarize" currentStage={link.stage} progress={link.progress_pct} label="여행 계획 생성" threshold={90} />
+          <StageItem stage="extract_places" currentStage={link.stage} progress={link.progress_pct} label="장소 추출" threshold={30} />
+          <StageItem stage="persist" currentStage={link.stage} progress={link.progress_pct} label="여행 계획 정리" threshold={85} />
         </StagesList>
       </StagesWrapper>
 
