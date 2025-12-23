@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
 import { useLinkDetail, useUpdateItem, useReorderItems } from "@/features/links/hooks";
-import { LinkHeader, PlaceListDnD } from "@/features/links/components";
+import { LinkHeader, PlaceListDnD, FloatingYoutubePlayer, YoutubePlayerProvider } from "@/features/links/components";
 
 const spin = keyframes`
   from {
@@ -16,8 +16,15 @@ const spin = keyframes`
 `;
 
 const PageWrapper = styled.div`
-  min-height: 100vh;
-  background-color: var(--color-white);
+  width: 100%;
+  max-width: var(--max-width);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background-color: var(--color-bg);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-e300);
 `;
 
 const LoadingWrapper = styled.div`
@@ -207,51 +214,56 @@ export default function LinkPage() {
   const lodgingCount = items.filter((i) => i.category === "LODGING").length;
 
   return (
-    <PageWrapper>
-      {/* 헤더 */}
-      <LinkHeader link={link} />
+    <YoutubePlayerProvider>
+      <PageWrapper>
+        {/* 헤더 */}
+        <LinkHeader link={link} />
 
-      {/* 메인 콘텐츠 */}
-      <Main>
-        {/* 통계 바 */}
-        <StatsBar>
-          <StatItem>
-            <span className="emoji">🎯</span>
-            <span className="label">
-              체험 <span className="value">{tnaCount}</span>곳
-            </span>
-          </StatItem>
-          <Divider />
-          <StatItem>
-            <span className="emoji">🏨</span>
-            <span className="label">
-              숙소 <span className="value">{lodgingCount}</span>곳
-            </span>
-          </StatItem>
-        </StatsBar>
+        {/* 메인 콘텐츠 */}
+        <Main>
+          {/* 통계 바 */}
+          <StatsBar>
+            <StatItem>
+              <span className="emoji">🎯</span>
+              <span className="label">
+                체험 <span className="value">{tnaCount}</span>곳
+              </span>
+            </StatItem>
+            <Divider />
+            <StatItem>
+              <span className="emoji">🏨</span>
+              <span className="label">
+                숙소 <span className="value">{lodgingCount}</span>곳
+              </span>
+            </StatItem>
+          </StatsBar>
 
-        {/* 드래그 안내 */}
-        {items.length > 1 && <DragTip>💡 카드를 길게 누르면 순서를 변경할 수 있어요</DragTip>}
+          {/* 드래그 안내 */}
+          {items.length > 1 && <DragTip>💡 카드를 길게 누르면 순서를 변경할 수 있어요</DragTip>}
 
-        {/* 장소 카드 리스트 */}
-        {items.length === 0 ? (
-          <EmptyState>
-            <div className="emoji">📍</div>
-            <p>아직 추출된 장소가 없습니다</p>
-          </EmptyState>
-        ) : (
-          <PlaceListDnD
-            items={items}
-            videoId={link.youtube_video_id}
-            onUpdateMemo={handleUpdateMemo}
-            onDelete={handleDelete}
-            onReorder={handleReorder}
-          />
-        )}
+          {/* 장소 카드 리스트 */}
+          {items.length === 0 ? (
+            <EmptyState>
+              <div className="emoji">📍</div>
+              <p>아직 추출된 장소가 없습니다</p>
+            </EmptyState>
+          ) : (
+            <PlaceListDnD
+              items={items}
+              videoId={link.youtube_video_id}
+              onUpdateMemo={handleUpdateMemo}
+              onDelete={handleDelete}
+              onReorder={handleReorder}
+            />
+          )}
 
-        {/* 하단 여백 */}
-        <BottomSpacer />
-      </Main>
-    </PageWrapper>
+          {/* 하단 여백 */}
+          <BottomSpacer />
+        </Main>
+
+        {/* 데스크톱 전용 플로팅 유튜브 플레이어 */}
+        <FloatingYoutubePlayer videoId={link.youtube_video_id} youtubeUrl={link.youtube_url} />
+      </PageWrapper>
+    </YoutubePlayerProvider>
   );
 }

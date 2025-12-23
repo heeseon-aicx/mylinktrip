@@ -10,6 +10,7 @@ import {
   getMrtSearchUrl,
   getCategoryLabel,
 } from "@/lib/utils";
+import { useYoutubePlayerOptional } from "./YoutubePlayerContext";
 
 interface PlaceCardProps {
   item: LinkItem;
@@ -126,7 +127,7 @@ const DeleteButton = styled.button`
   }
 `;
 
-const YoutubeLink = styled.a`
+const YoutubeButton = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -137,7 +138,8 @@ const YoutubeLink = styled.a`
   border-radius: 8px;
   font-size: 12px;
   font-weight: 500;
-  text-decoration: none;
+  border: none;
+  cursor: pointer;
   transition: background-color 0.2s ease;
 
   &:hover {
@@ -335,6 +337,7 @@ export function PlaceCard({
   const [isEditing, setIsEditing] = useState(false);
   const [memo, setMemo] = useState(item.user_memo || "");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const youtubePlayer = useYoutubePlayerOptional();
 
   const config = item.category ? CATEGORY_CONFIG[item.category] : CATEGORY_CONFIG.TNA;
   const categoryLabel = getCategoryLabel(item.category);
@@ -354,6 +357,22 @@ export function PlaceCard({
   const handleDelete = () => {
     onDelete?.();
     setShowDeleteConfirm(false);
+  };
+
+  const handleTimestampClick = () => {
+    if (!videoId || item.timeline_start_sec === null) return;
+
+    // 플레이어가 열려있으면 해당 시간으로 이동
+    if (youtubePlayer?.isOpen) {
+      youtubePlayer.seekTo(item.timeline_start_sec);
+    } else {
+      // 플레이어가 닫혀있으면 유튜브로 이동
+      window.open(
+        `https://www.youtube.com/watch?v=${videoId}&t=${item.timeline_start_sec}s`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
   };
 
   return (
@@ -398,16 +417,12 @@ export function PlaceCard({
 
           {/* 유튜브 타임스탬프 버튼 */}
           {timeDisplay && videoId && (
-            <YoutubeLink
-              href={`https://www.youtube.com/watch?v=${videoId}&t=${item.timeline_start_sec}s`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <YoutubeButton onClick={handleTimestampClick}>
               <svg fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
               </svg>
               <span style={{ fontWeight: 600 }}>{timeDisplay}</span>
-            </YoutubeLink>
+            </YoutubeButton>
           )}
 
           {/* 유튜버 코멘트 */}
