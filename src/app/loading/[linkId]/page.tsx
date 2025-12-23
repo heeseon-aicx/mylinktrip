@@ -19,9 +19,11 @@ const spin = keyframes`
 const pulse = keyframes`
   0%, 100% {
     opacity: 1;
+    transform: scale(1);
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.3;
+    transform: scale(0.9);
   }
 `;
 
@@ -143,7 +145,7 @@ const LoadingIconWrapper = styled.div`
 const LoadingIcon = styled.div`
   width: 64px;
   height: 64px;
-  background-color: var(--color-blue-80);
+  background-color: var(--color-red-50);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -152,7 +154,7 @@ const LoadingIcon = styled.div`
   svg {
     width: 32px;
     height: 32px;
-    color: var(--color-primary);
+    color: var(--color-red-500);
     animation: ${pulse} 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 `;

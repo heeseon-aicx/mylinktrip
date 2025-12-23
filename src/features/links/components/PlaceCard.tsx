@@ -20,11 +20,49 @@ interface PlaceCardProps {
   onDelete?: () => void;
 }
 
-// 카테고리별 아이콘/색상
+// 카테고리별 색상 (마이리얼트립 스타일)
 const CATEGORY_CONFIG = {
-  TNA: { icon: "🎯", bgColor: "var(--color-blue-50)", color: "var(--color-blue-600)" },
-  LODGING: { icon: "🏨", bgColor: "var(--color-purple-50)", color: "var(--color-purple-600)" },
+  TNA: {
+    bgColor: "#E8F6F3",
+    color: "#1A9E85",
+    borderColor: "#B8E6DC",
+  },
+  LODGING: {
+    bgColor: "#FFF5F0",
+    color: "#E85D3B",
+    borderColor: "#FFDDD3",
+  },
 };
+
+// SVG 아이콘 컴포넌트
+const PlaceIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+    />
+  </svg>
+);
+
+const LodgingIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h12v10z" />
+    <rect x="9" y="12" width="6" height="4" rx="0.5" />
+  </svg>
+);
 
 // Styled Components
 const Container = styled.div`
@@ -42,17 +80,26 @@ const Timeline = styled.div`
   padding-top: 12px;
 `;
 
-const TimelineIcon = styled.div<{ bgColor: string; color: string }>`
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+const TimelineIcon = styled.div<{
+  bgColor: string;
+  color: string;
+  borderColor: string;
+}>`
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   background-color: ${(props) => props.bgColor};
   color: ${(props) => props.color};
+  border: 1.5px solid ${(props) => props.borderColor};
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
   flex-shrink: 0;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
 `;
 
 const TimelineLine = styled.div`
@@ -152,11 +199,24 @@ const YoutubeButton = styled.button`
   }
 `;
 
-const YoutuberComment = styled.p`
-  font-size: 12px;
-  color: var(--color-gray-500);
-  margin-top: 8px;
-  font-style: italic;
+const YoutuberComment = styled.div`
+  margin-top: 10px;
+  padding: 10px 12px;
+  background-color: var(--color-gray-50);
+  border-left: 2px solid var(--color-gray-300);
+  border-radius: 0 6px 6px 0;
+
+  p {
+    font-size: 13px;
+    color: var(--color-gray-600);
+    line-height: 1.5;
+  }
+
+  .source {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--color-gray-400);
+  }
 `;
 
 const MemoTextarea = styled.textarea`
@@ -164,20 +224,20 @@ const MemoTextarea = styled.textarea`
   resize: none;
   border-radius: 8px;
   background-color: var(--color-white);
-  padding: 8px;
+  padding: 10px 12px;
   font-size: 14px;
   color: var(--color-gray-900);
-  border: 1px solid var(--color-gray-200);
+  border: 1px solid var(--color-gray-300);
   outline: none;
   font-family: inherit;
+  line-height: 1.5;
 
   &::placeholder {
     color: var(--color-gray-400);
   }
 
   &:focus {
-    box-shadow: 0 0 0 2px var(--color-primary);
-    border-color: transparent;
+    border-color: var(--color-gray-500);
   }
 `;
 
@@ -193,38 +253,57 @@ const MemoButtonRow = styled.div`
 `;
 
 const MemoActionButton = styled.button<{ variant?: "primary" }>`
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: ${(props) => (props.variant === "primary" ? "500" : "400")};
-  background-color: ${(props) => (props.variant === "primary" ? "var(--color-primary)" : "transparent")};
-  color: ${(props) => (props.variant === "primary" ? "var(--color-white)" : "var(--color-gray-500)")};
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  background-color: ${(props) =>
+    props.variant === "primary" ? "var(--color-gray-900)" : "transparent"};
+  color: ${(props) =>
+    props.variant === "primary"
+      ? "var(--color-white)"
+      : "var(--color-gray-500)"};
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${(props) => (props.variant === "primary" ? "var(--color-primary-hover)" : "transparent")};
-    color: ${(props) => (props.variant === "primary" ? "var(--color-white)" : "var(--color-gray-700)")};
+    background-color: ${(props) =>
+      props.variant === "primary"
+        ? "var(--color-gray-800)"
+        : "var(--color-gray-100)"};
+    color: ${(props) =>
+      props.variant === "primary"
+        ? "var(--color-white)"
+        : "var(--color-gray-700)"};
   }
 `;
 
 const MemoDisplay = styled.div<{ clickable?: boolean }>`
   margin-top: 12px;
-  padding: 8px;
+  padding: 10px 12px;
   border-radius: 8px;
-  background-color: var(--color-blue-50);
-  border: 1px solid var(--color-blue-100);
+  background-color: #fffbeb;
+  border: 1px solid #fef3c7;
   cursor: ${(props) => (props.clickable ? "pointer" : "default")};
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
 
   &:hover {
-    border-color: ${(props) => (props.clickable ? "var(--color-blue-200)" : "var(--color-blue-100)")};
+    background-color: ${(props) => (props.clickable ? "#FEF9E7" : "#FFFBEB")};
+    border-color: ${(props) => (props.clickable ? "#FDE68A" : "#FEF3C7")};
+  }
+
+  .label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #b45309;
+    margin-bottom: 4px;
   }
 
   p {
-    font-size: 12px;
-    color: var(--color-primary);
+    font-size: 13px;
+    color: var(--color-gray-800);
+    line-height: 1.5;
   }
 `;
 
@@ -319,11 +398,20 @@ const ModalButton = styled.button<{ variant?: "danger" }>`
   border: none;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  background-color: ${(props) => (props.variant === "danger" ? "var(--color-red-500)" : "var(--color-gray-100)")};
-  color: ${(props) => (props.variant === "danger" ? "var(--color-white)" : "var(--color-gray-700)")};
+  background-color: ${(props) =>
+    props.variant === "danger"
+      ? "var(--color-red-500)"
+      : "var(--color-gray-100)"};
+  color: ${(props) =>
+    props.variant === "danger"
+      ? "var(--color-white)"
+      : "var(--color-gray-700)"};
 
   &:hover {
-    background-color: ${(props) => (props.variant === "danger" ? "var(--color-red-600)" : "var(--color-gray-200)")};
+    background-color: ${(props) =>
+      props.variant === "danger"
+        ? "var(--color-red-600)"
+        : "var(--color-gray-200)"};
   }
 `;
 
@@ -339,7 +427,9 @@ export function PlaceCard({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const youtubePlayer = useYoutubePlayerOptional();
 
-  const config = item.category ? CATEGORY_CONFIG[item.category] : CATEGORY_CONFIG.TNA;
+  const config = item.category
+    ? CATEGORY_CONFIG[item.category]
+    : CATEGORY_CONFIG.TNA;
   const categoryLabel = getCategoryLabel(item.category);
   const timeDisplay = formatTimestamp(item.timeline_start_sec);
 
@@ -362,11 +452,11 @@ export function PlaceCard({
   const handleTimestampClick = () => {
     if (!videoId || item.timeline_start_sec === null) return;
 
-    // 플레이어가 열려있으면 해당 시간으로 이동
-    if (youtubePlayer?.isOpen) {
+    // YoutubePlayerContext가 있으면 인앱 플레이어로 재생 (데스크톱 + 모바일 바텀시트)
+    if (youtubePlayer) {
       youtubePlayer.seekTo(item.timeline_start_sec);
     } else {
-      // 플레이어가 닫혀있으면 유튜브로 이동
+      // Context가 없는 경우 폴백으로 유튜브 새 탭 열기
       window.open(
         `https://www.youtube.com/watch?v=${videoId}&t=${item.timeline_start_sec}s`,
         "_blank",
@@ -377,10 +467,14 @@ export function PlaceCard({
 
   return (
     <Container>
-      {/* 왼쪽: 타임라인 아이콘 */}
+      {/* 왼쪽: 타임라인 */}
       <Timeline>
-        <TimelineIcon bgColor={config.bgColor} color={config.color}>
-          {config.icon}
+        <TimelineIcon
+          bgColor={config.bgColor}
+          color={config.color}
+          borderColor={config.borderColor}
+        >
+          {item.category === "LODGING" ? <LodgingIcon /> : <PlaceIcon />}
         </TimelineIcon>
         {!isLast && <TimelineLine />}
       </Timeline>
@@ -396,7 +490,9 @@ export function PlaceCard({
                 {(item.city || item.country) && (
                   <>
                     {categoryLabel && <span>·</span>}
-                    <span>{[item.city, item.country].filter(Boolean).join(", ")}</span>
+                    <span>
+                      {[item.city, item.country].filter(Boolean).join(", ")}
+                    </span>
                   </>
                 )}
               </MetaRow>
@@ -404,7 +500,12 @@ export function PlaceCard({
 
             {onDelete && (
               <DeleteButton onClick={() => setShowDeleteConfirm(true)}>
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -426,7 +527,12 @@ export function PlaceCard({
           )}
 
           {/* 유튜버 코멘트 */}
-          {item.youtuber_comment && <YoutuberComment>💬 "{item.youtuber_comment}"</YoutuberComment>}
+          {item.youtuber_comment && (
+            <YoutuberComment>
+              <p>&ldquo;{item.youtuber_comment}&rdquo;</p>
+              <div className="source">영상 속 코멘트</div>
+            </YoutuberComment>
+          )}
 
           {/* 사용자 메모 - 보기/편집 모드 */}
           {isEditing ? (
@@ -439,21 +545,36 @@ export function PlaceCard({
                 autoFocus
               />
               <MemoButtonRow>
-                <MemoActionButton onClick={handleCancelEdit}>취소</MemoActionButton>
+                <MemoActionButton onClick={handleCancelEdit}>
+                  취소
+                </MemoActionButton>
                 <MemoActionButton variant="primary" onClick={handleSaveMemo}>
                   저장
                 </MemoActionButton>
               </MemoButtonRow>
             </MemoEditWrapper>
           ) : item.user_memo ? (
-            <MemoDisplay clickable={!!onUpdateMemo} onClick={() => onUpdateMemo && setIsEditing(true)}>
-              <p>📝 {item.user_memo}</p>
+            <MemoDisplay
+              clickable={!!onUpdateMemo}
+              onClick={() => onUpdateMemo && setIsEditing(true)}
+            >
+              <div className="label">내 메모</div>
+              <p>{item.user_memo}</p>
             </MemoDisplay>
           ) : (
             onUpdateMemo && (
               <AddMemoButton onClick={() => setIsEditing(true)}>
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 <span>메모 추가</span>
               </AddMemoButton>
@@ -462,8 +583,18 @@ export function PlaceCard({
 
           {/* 액션 버튼 */}
           <ActionButtons>
-            <ActionLink href={getGoogleMapsUrl(item.place_name)} target="_blank" rel="noopener noreferrer">
-              <Image src="/google-maps.png" alt="Google Maps" width={16} height={16} style={{ flexShrink: 0 }} />
+            <ActionLink
+              href={getGoogleMapsUrl(item.place_name)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Image
+                src="/google-maps.png"
+                alt="Google Maps"
+                width={16}
+                height={16}
+                style={{ flexShrink: 0 }}
+              />
               <span>구글맵 보기</span>
             </ActionLink>
             <ActionLink
@@ -493,7 +624,9 @@ export function PlaceCard({
                 삭제하시겠어요?
               </ModalText>
               <ModalButtons>
-                <ModalButton onClick={() => setShowDeleteConfirm(false)}>취소</ModalButton>
+                <ModalButton onClick={() => setShowDeleteConfirm(false)}>
+                  취소
+                </ModalButton>
                 <ModalButton variant="danger" onClick={handleDelete}>
                   삭제
                 </ModalButton>
