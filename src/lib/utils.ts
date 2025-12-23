@@ -29,18 +29,16 @@ export function getGoogleMapsUrl(placeName: string): string {
 
 /**
  * 마이리얼트립 검색 URL 생성
- * TODO: 실제 마이리얼트립 URL 구조 확인 후 수정 필요
  */
 export function getMrtSearchUrl(
   placeName: string,
   city: string | null,
-  category: PlaceCategory | null
+  _category: PlaceCategory | null
 ): string {
-  const type = category === "LODGING" ? "accommodations" : "tna";
   const query = city
     ? encodeURIComponent(`${city} ${placeName}`)
     : encodeURIComponent(placeName);
-  return `https://www.myrealtrip.com/${type}?search=${query}`;
+  return `https://www.myrealtrip.com/search-bridge?q=${query}`;
 }
 
 /**

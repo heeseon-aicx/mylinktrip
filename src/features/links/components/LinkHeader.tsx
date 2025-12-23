@@ -49,6 +49,7 @@ const NavButton = styled.button<{ side: "left" | "right" }>`
 
 const Title = styled.h1`
   flex: 1;
+  font-size: 16px;
   font-weight: 600;
   color: var(--color-gray-900);
   padding: 0 8px;
