@@ -1,3 +1,4 @@
+import "./deno.d.ts";
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 type LinkStage = "fetch_meta" | "transcribe" | "extract_places" | "summarize" | "persist";

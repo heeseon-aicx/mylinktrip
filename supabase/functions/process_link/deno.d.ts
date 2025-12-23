@@ -15,3 +15,8 @@ declare namespace Deno {
   ): void;
 }
 
+// Supabase 타입 선언 (IDE용)
+declare module "https://esm.sh/@supabase/supabase-js@2" {
+  export * from "@supabase/supabase-js";
+  export { createClient } from "@supabase/supabase-js";
+}
