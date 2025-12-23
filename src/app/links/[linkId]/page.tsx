@@ -54,9 +54,21 @@ const ErrorWrapper = styled.div`
   background-color: var(--color-white);
 `;
 
-const ErrorEmoji = styled.div`
-  font-size: 60px;
-  margin-bottom: 16px;
+const ErrorIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-gray-100);
+  border-radius: 50%;
+
+  svg {
+    width: 36px;
+    height: 36px;
+    color: var(--color-gray-400);
+  }
 `;
 
 const ErrorTitle = styled.h1`
@@ -94,57 +106,73 @@ const Main = styled.main`
 const StatsBar = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px;
-  margin-bottom: 16px;
-  background-color: var(--color-gray-50);
-  border-radius: 12px;
-  font-size: 14px;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
 `;
 
-const StatItem = styled.div`
+const StatBadge = styled.div<{ variant: "teal" | "orange" }>`
   display: flex;
   align-items: center;
-  gap: 8px;
-
-  .emoji {
-    font-size: 18px;
-  }
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: ${(props) =>
+    props.variant === "teal" ? "#E8F6F3" : "#FFF5F0"};
+  border: 1px solid
+    ${(props) => (props.variant === "teal" ? "#B8E6DC" : "#FFDDD3")};
 
   .label {
-    color: var(--color-gray-600);
+    color: ${(props) => (props.variant === "teal" ? "#158A73" : "#C74A2C")};
+    font-weight: 500;
   }
 
-  .value {
-    font-weight: 600;
-    color: var(--color-gray-900);
+  .count {
+    color: ${(props) => (props.variant === "teal" ? "#1A9E85" : "#E85D3B")};
+    font-weight: 700;
   }
 `;
 
-const Divider = styled.div`
-  width: 1px;
-  height: 16px;
-  background-color: var(--color-gray-200);
-`;
-
-const DragTip = styled.p`
-  text-align: center;
+const DragTip = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-size: 12px;
   color: var(--color-gray-400);
   margin-bottom: 16px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+  }
 `;
 
 const EmptyState = styled.div`
   padding: 64px 0;
   text-align: center;
 
-  .emoji {
-    font-size: 48px;
-    margin-bottom: 16px;
+  .icon-wrapper {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-gray-100);
+    border-radius: 50%;
+
+    svg {
+      width: 28px;
+      height: 28px;
+      color: var(--color-gray-400);
+    }
   }
 
   p {
     color: var(--color-gray-500);
+    font-size: 14px;
   }
 `;
 
@@ -189,7 +217,11 @@ export default function LinkPage() {
   if (isError || !link) {
     return (
       <ErrorWrapper>
-        <ErrorEmoji>😕</ErrorEmoji>
+        <ErrorIcon>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+        </ErrorIcon>
         <ErrorTitle>여행 계획을 찾을 수 없어요</ErrorTitle>
         <ErrorText>잘못된 링크이거나 만료된 링크입니다</ErrorText>
         <PrimaryButton onClick={() => router.push("/")}>홈으로 돌아가기</PrimaryButton>
@@ -201,7 +233,11 @@ export default function LinkPage() {
   if (link.status !== "READY") {
     return (
       <ErrorWrapper>
-        <ErrorEmoji>⏳</ErrorEmoji>
+        <ErrorIcon>
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </ErrorIcon>
         <ErrorTitle>아직 분석 중이에요</ErrorTitle>
         <ErrorText>잠시 후 다시 확인해주세요</ErrorText>
         <PrimaryButton onClick={() => router.push(`/loading/${linkId}`)}>로딩 페이지로 이동</PrimaryButton>
@@ -223,28 +259,35 @@ export default function LinkPage() {
         <Main>
           {/* 통계 바 */}
           <StatsBar>
-            <StatItem>
-              <span className="emoji">🎯</span>
-              <span className="label">
-                체험 <span className="value">{tnaCount}</span>곳
-              </span>
-            </StatItem>
-            <Divider />
-            <StatItem>
-              <span className="emoji">🏨</span>
-              <span className="label">
-                숙소 <span className="value">{lodgingCount}</span>곳
-              </span>
-            </StatItem>
+            <StatBadge variant="teal">
+              <span className="label">장소</span>
+              <span className="count">{tnaCount}</span>
+            </StatBadge>
+            <StatBadge variant="orange">
+              <span className="label">숙소</span>
+              <span className="count">{lodgingCount}</span>
+            </StatBadge>
           </StatsBar>
 
           {/* 드래그 안내 */}
-          {items.length > 1 && <DragTip>💡 카드를 길게 누르면 순서를 변경할 수 있어요</DragTip>}
+          {items.length > 1 && (
+            <DragTip>
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+              <span>카드를 길게 눌러 순서를 변경할 수 있어요</span>
+            </DragTip>
+          )}
 
           {/* 장소 카드 리스트 */}
           {items.length === 0 ? (
             <EmptyState>
-              <div className="emoji">📍</div>
+              <div className="icon-wrapper">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+              </div>
               <p>아직 추출된 장소가 없습니다</p>
             </EmptyState>
           ) : (

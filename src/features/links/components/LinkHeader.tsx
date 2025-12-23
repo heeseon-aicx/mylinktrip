@@ -67,7 +67,7 @@ const ChannelRow = styled.div`
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: var(--color-gray-500);
+  color: var(--color-red-500);
 
   svg {
     width: 16px;
@@ -106,8 +106,17 @@ export function LinkHeader({ link }: LinkHeaderProps) {
       <NavRow>
         {/* 뒤로가기 */}
         <NavButton side="left" onClick={() => router.push("/")}>
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          <svg
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
         </NavButton>
 
@@ -116,7 +125,12 @@ export function LinkHeader({ link }: LinkHeaderProps) {
 
         {/* 공유 버튼 */}
         <NavButton side="right" onClick={handleShare}>
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

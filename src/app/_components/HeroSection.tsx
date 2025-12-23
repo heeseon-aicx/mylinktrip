@@ -16,7 +16,6 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   padding: 48px 20px;
-  gap: 1rem;
 `;
 
 const YoutubeIcon = styled.div`
@@ -138,8 +137,8 @@ export function HeroSection() {
             </svg>
           }
           label="장소 추출"
-          bgColor="var(--color-blue-100)"
-          textColor="var(--color-blue-600)"
+          bgColor="#E8F6F3"
+          textColor="#1A9E85"
         />
         <FeatureItem
           icon={
@@ -155,8 +154,8 @@ export function HeroSection() {
             </svg>
           }
           label="메모 추가"
-          bgColor="var(--color-green-100)"
-          textColor="var(--color-green-600)"
+          bgColor="#FEF9E7"
+          textColor="#B45309"
         />
         <FeatureItem
           icon={
@@ -172,8 +171,8 @@ export function HeroSection() {
             </svg>
           }
           label="예약 연결"
-          bgColor="var(--color-purple-100)"
-          textColor="var(--color-purple-600)"
+          bgColor="#FFF5F0"
+          textColor="#E85D3B"
         />
       </FeaturesRow>
     </Container>
