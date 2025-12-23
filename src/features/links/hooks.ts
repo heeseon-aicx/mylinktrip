@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { mockApi } from "@/data/mock/api";
+import { api } from "@/data/api";
 import type {
   LinkDetailResponse,
   UpdateItemRequest,
@@ -30,7 +30,7 @@ export function useLinkDetail(linkId: number, options?: { polling?: boolean }) {
 
   return useQuery({
     queryKey: linkKeys.detail(linkId),
-    queryFn: () => mockApi.getLinkDetail(linkId),
+    queryFn: () => api.getLinkDetail(linkId),
     refetchInterval: (query) => {
       if (!options?.polling) return false;
 
@@ -53,7 +53,7 @@ export function useCreateLink() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: (youtubeUrl: string) => mockApi.createLink(youtubeUrl),
+    mutationFn: (youtubeUrl: string) => api.createLink(youtubeUrl),
     onSuccess: (data) => {
       router.push(`/loading/${data.id}`);
     },
@@ -73,7 +73,7 @@ export function useUpdateItem(linkId: number) {
     }: {
       itemId: number;
       patch: UpdateItemRequest;
-    }) => mockApi.updateItem(linkId, itemId, patch),
+    }) => api.updateItem(linkId, itemId, patch),
 
     // Optimistic Update
     onMutate: async ({ itemId, patch }) => {
@@ -139,7 +139,7 @@ export function useReorderItems(linkId: number) {
 
   return useMutation({
     mutationFn: (payload: ReorderRequest) =>
-      mockApi.reorderItems(linkId, payload),
+      api.reorderItems(linkId, payload),
 
     // Optimistic Update
     onMutate: async (payload) => {
