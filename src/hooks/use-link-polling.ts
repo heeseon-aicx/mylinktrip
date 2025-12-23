@@ -2,12 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import {
-  LinkRow,
-  LinkPlaceItemRow,
-  isLinkWithPlaces,
-  isLinkRow,
-} from "@/types/database";
+import { LinkRow, LinkPlaceItemRow, isLinkWithPlaces } from "@/types/database";
 
 interface LinkWithItems extends LinkRow {
   link_place_items: LinkPlaceItemRow[];

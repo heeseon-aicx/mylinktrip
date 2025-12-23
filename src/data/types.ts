@@ -5,9 +5,8 @@
 export type LinkStatus = "PENDING" | "PROCESSING" | "READY" | "FAILED";
 export type LinkStage =
   | "fetch_meta"
-  | "transcribe"
   | "extract_places"
-  | "summarize";
+  | "persist";
 export type PlaceCategory = "TNA" | "LODGING";
 
 // ============================================
@@ -122,33 +121,27 @@ export const PROGRESS_STATES: ProgressState[] = [
   },
   {
     status: "PROCESSING",
+    progress_pct: 20,
+    stage: "fetch_meta",
+    status_message: "영상 메타데이터 분석 중...",
+  },
+  {
+    status: "PROCESSING",
     progress_pct: 30,
-    stage: "transcribe",
-    status_message: "자막 추출 중...",
-  },
-  {
-    status: "PROCESSING",
-    progress_pct: 50,
-    stage: "transcribe",
-    status_message: "자막 분석 중...",
-  },
-  {
-    status: "PROCESSING",
-    progress_pct: 70,
     stage: "extract_places",
     status_message: "장소 추출 중...",
   },
   {
     status: "PROCESSING",
-    progress_pct: 85,
+    progress_pct: 70,
     stage: "extract_places",
-    status_message: "장소 정보 정리 중...",
+    status_message: "장소 정보 검증 중...",
   },
   {
     status: "PROCESSING",
-    progress_pct: 95,
-    stage: "summarize",
-    status_message: "여행 계획 생성 중...",
+    progress_pct: 85,
+    stage: "persist",
+    status_message: "여행 계획 정리 중...",
   },
   {
     status: "READY",

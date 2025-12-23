@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import {
   LinkRow,
   LinkPlaceItemRow,
@@ -54,7 +54,31 @@ export async function createLink(params: CreateLinkParams): Promise<LinkRow> {
 
   if (error) throw error;
 
-  return toLinkRow(data);
+  const link = toLinkRow(data);
+
+  // Edge Function 호출 (비동기, 결과 기다리지 않음)
+  invokeProcessLink(link.id).catch((err) => {
+    console.error("Failed to invoke process_link:", err);
+  });
+
+  return link;
+}
+
+/**
+ * Edge Function 호출 (process_link)
+ * Admin client 사용 (service_role key 필요)
+ */
+async function invokeProcessLink(linkId: number): Promise<void> {
+  const supabase = createAdminClient();
+  
+  const { error } = await supabase.functions.invoke("process_link", {
+    body: { link_id: linkId },
+  });
+
+  if (error) {
+    console.error("Edge function invocation error:", error);
+    throw error;
+  }
 }
 
 /**

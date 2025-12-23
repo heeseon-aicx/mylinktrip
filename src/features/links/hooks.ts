@@ -26,8 +26,6 @@ export const linkKeys = {
  * 링크 상세 조회 (폴링 지원)
  */
 export function useLinkDetail(linkId: number, options?: { polling?: boolean }) {
-  const router = useRouter();
-
   return useQuery({
     queryKey: linkKeys.detail(linkId),
     queryFn: () => api.getLinkDetail(linkId),
@@ -117,10 +115,7 @@ export function useUpdateItem(linkId: number) {
     // 에러 시 롤백
     onError: (_err, _variables, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(
-          linkKeys.detail(linkId),
-          context.previousData
-        );
+        queryClient.setQueryData(linkKeys.detail(linkId), context.previousData);
       }
     },
 
@@ -138,8 +133,7 @@ export function useReorderItems(linkId: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: ReorderRequest) =>
-      api.reorderItems(linkId, payload),
+    mutationFn: (payload: ReorderRequest) => api.reorderItems(linkId, payload),
 
     // Optimistic Update
     onMutate: async (payload) => {
@@ -174,10 +168,7 @@ export function useReorderItems(linkId: number) {
 
     onError: (_err, _variables, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(
-          linkKeys.detail(linkId),
-          context.previousData
-        );
+        queryClient.setQueryData(linkKeys.detail(linkId), context.previousData);
       }
     },
 
@@ -186,4 +177,3 @@ export function useReorderItems(linkId: number) {
     },
   });
 }
-

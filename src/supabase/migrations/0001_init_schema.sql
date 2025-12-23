@@ -17,7 +17,7 @@ create table if not exists public.links (
   -- status: PENDING | PROCESSING | READY | FAILED
   status text not null default 'PENDING',
   progress_pct int not null default 0,   -- 0~100 (검증은 서비스 레이어)
-  stage text,                            -- 예: fetch_meta/transcribe/extract_places/summarize
+  stage text,                            -- 예: fetch_meta/extract_places/persist
   status_message text,                   -- UI에 보여줄 한 줄 상태
 
   -- 실패 정보 (FAILED일 때 채우기)

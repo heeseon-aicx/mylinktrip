@@ -1,0 +1,181 @@
+/* ================================
+   MyLinkTrip Design System
+   Based on MyRealTrip Theme
+   ================================ */
+
+:root {
+  /* ================================
+     Layout
+     ================================ */
+  --min-width: 320px;
+  --max-width: 430px;
+
+  /* ================================
+     Font Family
+     ================================ */
+  --font-sans: "Pretendard", "SF Pro KR", "SF Pro Display", -apple-system,
+    BlinkMacSystemFont, "Noto Sans KR", "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+
+  /* ================================
+     Font Weights
+     ================================ */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ================================
+     Colors
+     ================================ */
+  --color-white: #ffffff;
+
+  /* Gray Scale */
+  --color-gray-1000: #141719;
+  --color-gray-900: #212529;
+  --color-gray-800: #343a40;
+  --color-gray-700: #495056;
+  --color-gray-600: #666d75;
+  --color-gray-500: #848c94;
+  --color-gray-400: #adb5bd;
+  --color-gray-300: #ced4da;
+  --color-gray-200: #dee2e6;
+  --color-gray-100: #e9ecef;
+  --color-gray-80: #f1f3f5;
+  --color-gray-60: #f5f6f7;
+  --color-gray-50: #f8f9fa;
+
+  /* Blue (Primary) */
+  --color-blue-900: #01457d;
+  --color-blue-800: #025ba5;
+  --color-blue-700: #0a70c2;
+  --color-blue-600: #1583db;
+  --color-blue-500: #2b96ed;
+  --color-blue-400: #51abf3;
+  --color-blue-300: #79bef5;
+  --color-blue-200: #a7d4f9;
+  --color-blue-100: #cbe7fd;
+  --color-blue-80: #e7f4fd;
+  --color-blue-50: #f5fbff;
+
+  /* Green (Success) */
+  --color-green-900: #0a4534;
+  --color-green-800: #10634c;
+  --color-green-700: #137b5e;
+  --color-green-600: #1c9674;
+  --color-green-500: #27ab86;
+  --color-green-400: #33b893;
+  --color-green-300: #58caab;
+  --color-green-200: #71d2b8;
+  --color-green-100: #94e7d1;
+  --color-green-80: #d7f6ee;
+  --color-green-50: #e6f8f3;
+
+  /* Yellow (Warning) */
+  --color-yellow-900: #b94100;
+  --color-yellow-800: #db5600;
+  --color-yellow-700: #f78000;
+  --color-yellow-600: #ff9a00;
+  --color-yellow-500: #ffad01;
+  --color-yellow-400: #ffbf00;
+  --color-yellow-300: #ffc929;
+  --color-yellow-200: #ffd74e;
+  --color-yellow-100: #ffe182;
+  --color-yellow-80: #fff2c6;
+  --color-yellow-50: #fff8e1;
+
+  /* Red (Error) */
+  --color-red-900: #8d2115;
+  --color-red-800: #aa2a1b;
+  --color-red-700: #c83323;
+  --color-red-600: #dd3c2a;
+  --color-red-500: #ec4937;
+  --color-red-400: #fa5b4a;
+  --color-red-300: #fe6a54;
+  --color-red-200: #ff8d7c;
+  --color-red-100: #ffaea1;
+  --color-red-80: #ffd4cc;
+  --color-red-50: #fbf1ef;
+
+  /* Purple */
+  --color-purple-900: #29085e;
+  --color-purple-800: #3d0b8e;
+  --color-purple-700: #520fbd;
+  --color-purple-600: #7226ed;
+  --color-purple-500: #8238fa;
+  --color-purple-400: #9355f6;
+  --color-purple-300: #a26ef7;
+  --color-purple-200: #b080ff;
+  --color-purple-100: #d0b4fd;
+  --color-purple-80: #e6d7fe;
+  --color-purple-50: #f6f0ff;
+
+  /* ================================
+     Semantic Colors
+     ================================ */
+  --color-primary: #2b96ed;
+  --color-primary-hover: #1583db;
+  --color-secondary: #343a40;
+  --color-success: #27ab86;
+  --color-warning: #f78000;
+  --color-error: #ec4937;
+
+  /* ================================
+     Background & Text
+     ================================ */
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f8f9fa;
+  --color-bg-tertiary: #f1f3f5;
+  --color-text: #212529;
+  --color-text-secondary: #666d75;
+  --color-text-tertiary: #848c94;
+  --color-text-disabled: #adb5bd;
+  --color-border: #dee2e6;
+  --color-border-light: #e9ecef;
+
+  /* ================================
+     Z-index Scale
+     ================================ */
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-header: 20;
+  --z-dropdown: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-bottom-sheet: 51;
+  --z-toast: 60;
+  --z-tooltip: 70;
+
+  /* ================================
+     Spacing
+     ================================ */
+  --spacing-page: 16px;
+  --spacing-section: 24px;
+
+  /* ================================
+     Border Radius
+     ================================ */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* ================================
+     Shadows (Elevation)
+     ================================ */
+  --shadow-e100: 0px 0.5px 0px rgba(0, 0, 0, 0.02),
+    0px 1px 2px rgba(0, 0, 0, 0.03), 0px 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-e200: 0px 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-e300: 0px 1px 2px rgba(0, 0, 0, 0.05),
+    0px 4px 14px rgba(0, 0, 0, 0.1);
+  --shadow-e400: 0px 1px 4px rgba(0, 0, 0, 0.03),
+    0px 4px 12px rgba(0, 0, 0, 0.16);
+  --shadow-e500: 0px 4px 8px rgba(0, 0, 0, 0.05),
+    0px 8px 24px rgba(0, 0, 0, 0.2);
+  --shadow-e100-up: 0px -0.5px 0px rgba(0, 0, 0, 0.02),
+    0px -1px 2px rgba(0, 0, 0, 0.03), 0px -2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-e300-up: 0px -1px 2px rgba(0, 0, 0, 0.05),
+    0px -4px 14px rgba(0, 0, 0, 0.1);
+}
